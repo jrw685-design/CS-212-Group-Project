@@ -7,7 +7,7 @@ let notes = [
         tags: ["tag1", "tag2"]
     } // end note
 ];
-
+// test note
 // returns the current date
 function getCurrentDate()
 {
