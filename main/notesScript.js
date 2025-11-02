@@ -13,7 +13,6 @@ let notes = [
 function getCurrentDate()
 {
     let currDate = new Date();
-    console.log(currDate);
     return currDate;
     
 }
