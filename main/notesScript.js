@@ -59,6 +59,8 @@ function getTags(tags)
 
 }
 
+document.querySelector("#add-note").addEventListener("click", addNote);
+
 function addNote()
 {
     notes[newestIndex].title = "New Note";
