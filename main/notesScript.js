@@ -41,7 +41,7 @@ function getNoteId(index, type)
 // IMPORTANT NOTE (pun intended) does not work for div element
 function getNoteHtml(element, index, type, content)
 {
-    return "<" + element + "class=\"note-" + type + "\" id=\"" + getNoteId(index, type) + "\">" + content + "</" + element + ">";
+    return "<" + element + " class=\"note-" + type + "\" id=\"" + getNoteId(index, type) + "\">" + content + "</" + element + ">";
 }
 
 function getTags(tags)
@@ -63,20 +63,23 @@ document.querySelector("#add-note").addEventListener("click", addNote);
 
 function addNote()
 {
-    notes[newestIndex].title = "New Note";
-    notes[newestIndex].desc = "";
-    notes[newestIndex].date = getCurrentDate();
-    notes[newestIndex].state = "regular";
-    notes[newestIndex].tags = [];
-
+    notes[newestIndex] = {
+        title: "New Note",
+        desc: "Sample Description",
+        date: getCurrentDate(),
+        state: "regular",
+        tags: []
+    };
+    let allTags = getTags(notes[newestIndex].tags);
+    
     // add note to html document with a single string
-    let newNote = "div id=\"" + getNoteId(newestIndex, "div") + "\">" 
+    let newNote = "<div id=\"" + getNoteId(newestIndex, "div") + "\">" 
         + getNoteHtml("h2", newestIndex, "title", notes[newestIndex].title) 
         + getNoteHtml("p", newestIndex, "desc", notes[newestIndex].desc) 
-        + getNoteHtml(getNoteHtml("p", newestIndex, "tags", getTags(notes[newestIndex].tags))) 
-        + getNoteHtml(getNoteHtml("p", newestIndex, "date", notes[newestIndex].date)) 
-        + getNoteHtml(getNoteHtml("button", newestIndex, "editb", "Edit"))
-        + getNoteHtml(getNoteHtml("button", newestIndex, "delb", "Delete"))
+        + getNoteHtml("p", newestIndex, "tags", allTags)
+        + getNoteHtml("p", newestIndex, "date", notes[newestIndex].date)
+        + getNoteHtml("button", newestIndex, "editb", "Edit")
+        + getNoteHtml("button", newestIndex, "delb", "Delete")
         + "</div>";
     $("div.all-notes").append(newNote);
 
