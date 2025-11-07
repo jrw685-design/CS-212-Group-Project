@@ -2,3 +2,21 @@
     border: 1px solid black;
     width: 15%;
 }
+
+
+textarea.edit-note-desc {
+    resize: none;
+
+    /* size is not permanent */
+    width: 167px;
+    height: 167px;
+}
+
+textarea.edit-note-title {
+    resize: none;
+
+    /* size is not permanent */
+    width: 167px;
+    height: 25px;
+    font-size: 20px;
+}
