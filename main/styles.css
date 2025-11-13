@@ -1,6 +1,8 @@
-.note {
+.all-notes {
     border: 1px solid black;
     width: 15%;
+    /* color  for note */
+    background: rgb(216, 211, 163);
 }
 
 
@@ -10,6 +12,8 @@ textarea.edit-note-desc {
     /* size is not permanent */
     width: 167px;
     height: 167px;
+    /* color for edited note */
+    background: rgb(173, 148, 110);
 }
 
 textarea.edit-note-title {
@@ -19,4 +23,6 @@ textarea.edit-note-title {
     width: 167px;
     height: 25px;
     font-size: 20px;
+    /* color for edited note */
+    background: rgb(173, 148, 110);
 }
