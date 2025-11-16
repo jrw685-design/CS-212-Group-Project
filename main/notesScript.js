@@ -121,7 +121,8 @@ function editNote(id)
     // TODO: fix this becuase it doesnt work for whatever reason
     for (var i = 0; i < notes[id].tags.length; i++)
     {
-        let tagHTML = " <p id=\"note-tag-" + i + "\" class=\"tag-list-" + id + "\"" + notes[id].tags[i] + " ";
+        // small edit to this line by adding a ">" after the class attribute and a closing </p> in the quotations
+        let tagHTML = " <p id=\"note-tag-" + i + "\" class=\"tag-list-" + id + "\">" + notes[id].tags[i] + "</p>";
         
         $("#" + getNoteId(id, "body")).append(tagHTML + ", ");
     }
@@ -175,4 +176,5 @@ function saveNote(id)
     {
         editNote(thisIndex);
     });
+
 }
