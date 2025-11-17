@@ -1,4 +1,5 @@
 let notes = [
+    /* example note for reference
     { // start note
         title: "template title",
         desc: "note content here",
@@ -6,6 +7,7 @@ let notes = [
         state: "regular",
         tags: ["tag1", "tag2"]
     } // end note
+     */
 ];
 
 // used to add to the array
@@ -15,7 +17,8 @@ let newestIndex = 0;
 function getCurrentDate()
 {
     let currDate = new Date();
-    return currDate;
+    //return "Last updated: " + currDate.getDate() + "-" + currDate.getMonth() + "-" + currDate.getFullYear() + " at " + currDate.getHours() + ":" + currDate.getSeconds();
+    return "Last updated: " + currDate.toDateString() + " at " + currDate.toTimeString().split(" ")[0];
     
 }
 
@@ -63,118 +66,282 @@ document.getElementById("add-note").addEventListener("click", addNote);
 
 function addNote()
 {
-    const thisIndex = newestIndex;
-    notes[newestIndex] = {
+    // get last index
+    const thisIndex = notes.length;
+    notes[thisIndex] = {
         title: "New Note",
         desc: "Sample Description",
         date: getCurrentDate(),
         state: "regular",
-        tags: ["cooltag", "sample"]
+        tags: []
     };
-    let allTags = getTags(notes[newestIndex].tags);
-    
-    // add note to html document with a single string
-    let newNote = "<div id=\"" + getNoteId(newestIndex, "div") + "\">" 
-        + getNoteHtml("h2", newestIndex, "title", notes[newestIndex].title) 
-        + "<div id=\"" + getNoteId(newestIndex, "body") + "\">"
-        + getNoteHtml("p", newestIndex, "desc", notes[newestIndex].desc)
-        + getNoteHtml("p", newestIndex, "tags", allTags) + "</div>"
-        + getNoteHtml("p", newestIndex, "date", notes[newestIndex].date)
-        + getNoteHtml("button", newestIndex, "editb", "Edit")
-        + getNoteHtml("button", newestIndex, "delb", "Delete")
-        + "</div>";
-    $("div.all-notes").append(newNote);
-    
-    let editbid = getNoteId(thisIndex, "editb");
-    console.log(editbid)
-    $("button#" + editbid).on("click", function()
-    {
-        editNote(thisIndex);
-    });
-    
+    let allTags = "tags: " + getTags(notes[thisIndex].tags);
 
-    newestIndex++;
+    // update all notes
+    updateNotes();
+    
 }
 
 function editNote(id)
 {
-    console.log(id);
     
+    // store current title, tags, and description
     let tags = notes[id].tags;
     let oldDesc = document.getElementById(getNoteId(id, "desc")).innerHTML;
     let oldTitle = document.getElementById(getNoteId(id, "title")).innerHTML;
+
+    // remove all existing elements from note
     $("#" + getNoteId(id, "title")).remove();
     $("#" + getNoteId(id, "desc")).remove();
     $("#" + getNoteId(id, "tags")).remove();
 
     $("#" + getNoteId(id, "editb")).remove();
     $("#" + getNoteId(id, "delb")).remove();
+    $("#" + getNoteId(id, "pinb")).remove();
 
+    // create html textbox strings
     let titleTextbox = "<textarea type=\"text\" class=\"edit-note-title\" id=\"" + getNoteId(id, "edit-title") + "\">";
     let descTextbox = "<textarea type=\"text\" class=\"edit-note-desc\" id=\"" + getNoteId(id, "edit-desc") + "\">";
+
+    // insert textboxes
     $("#" + getNoteId(id, "div")).prepend(titleTextbox);
     document.getElementById(getNoteId(id, "body")).innerHTML = descTextbox;
+
+    // place existing content in textboxes
     document.getElementById(getNoteId(id, "edit-title")).value = oldTitle;
     document.getElementById(getNoteId(id, "edit-desc")).value = oldDesc;
     
-
-    // TODO: fix this becuase it doesnt work for whatever reason
-    for (var i = 0; i < notes[id].tags.length; i++)
+    // create input box and button to add a tag
+    let addTagHTML = "<input type=\"input\" id=\"" + getNoteId(id, "add-tag-in") + "\"></input>" + "<button id=\"" + getNoteId(id, "add-tag-b") + "\">Add Tag</button>";
+    $("#" + getNoteId(id, "body")).append(addTagHTML);
+    $("button#" + getNoteId(id, "add-tag-b")).on("click", function()
     {
-        // small edit to this line by adding a ">" after the class attribute and a closing </p> in the quotations
-        let tagHTML = " <p id=\"note-tag-" + i + "\" class=\"tag-list-" + id + "\">" + notes[id].tags[i] + "</p>";
         
-        $("#" + getNoteId(id, "body")).append(tagHTML + ", ");
-    }
+        addTag(id);
+        
+    });
 
-    //TODO: make tags editable
-
+    // add button to save changes
     let saveb = getNoteHtml("button", id, "save-edit", "Save");
     $("#" + getNoteId(id, "div")).append(saveb);
     $("button#" + getNoteId(id, "save-edit")).on("click", function()
     {
-        console.log(this);
+        
         saveNote(id);
         
     });
+    updateEditTags(id);
 
 }
-// TODO: addTag function (and probably delTag eventually)
-function addTag(id, tagIndex)
+
+
+
+function addTag(id)
+{
+    
+    let newTag = document.getElementById(getNoteId(id, "add-tag-in")).value;
+    let newIndex = findValue(notes[id].tags, " ");
+    if(findValue(notes[id].tags, newTag) == notes[id].tags.length && newTag != "")
+    {
+        notes[id].tags[newIndex] = newTag;
+    }
+    updateEditTags(id);
+    
+
+
+}
+
+
+function updateEditTags(id)
 {
 
+    $(".tag-list-" + id).remove();
+    
+    for (var i = 0; i < notes[id].tags.length; i++)
+    {
+        if(notes[id].tags[i] != undefined)
+        {
+            // small edit to this line by adding a ">" after the class attribute and a closing </p> in the quotations
+            let tagHTML = " <p id=\"note-tag-" + i + "\" class=\"tag-list-" + id + "\">" + notes[id].tags[i] + "</p>";
+            const thisIndex = i;
+            $("#" + getNoteId(id, "body")).append(tagHTML);
+            $("#note-tag-" + thisIndex + ".tag-list-" + id).on("click", function()
+            {
+                
+                delTag(thisIndex, id);
+            
+            });
+        }
+    }
+}
+function delTag(index, id)
+{
+    notes[id].tags[index] = " ";
+    moveIndexes(notes[id].tags);
+    updateEditTags(id);
+}
+function moveIndexes(list)
+{
+    if(list.length > 1)
+    {
+        for(var i = 0; i < list.length; i++)
+            {
+                if(i < list.length - 1)
+                {
+                    if(list[i] == " " || list[i] == undefined)
+                    {
+                        list[i] = list[i + 1];
+                        list[i + 1] = undefined;
+                    }
+                }
+
+            }
+    }
+    list.length--;
+    
+}
+
+function findValue(list, value)
+{
+    for (var i = 0; i < list; i++)
+    {
+        if (list[i] == value)
+        {
+            return i;
+        }
+    }
+    return list.length;
 }
 
 
 function saveNote(id)
 {
-    notes[id].date = new Date();
+    notes[id].date = getCurrentDate();
     notes[id].title = document.getElementById(getNoteId(id, "edit-title")).value;
     notes[id].desc = document.getElementById(getNoteId(id, "edit-desc")).value;
     
-    $("#" + getNoteId(id, "date")).remove();
-    let newTags = getTags(notes[id].tags);
-    
-    let newBody = getNoteHtml("h2", id, "title", notes[id].title)
-        + "<div id=\"" + getNoteId(id, "body") + "\">"
-        + getNoteHtml("p", id, "desc", notes[id].desc)
-        + getNoteHtml("p", id, "tags", newTags) + "</div>"
-        + getNoteHtml("p", id, "date", notes[id].date)
-        + getNoteHtml("button", id, "editb", "Edit")
-        + getNoteHtml("button", id, "delb", "Delete");
-
-    $("#" + getNoteId(id, "div")).append(newBody);
-
-    $("button#" + getNoteId(id, "save-edit")).remove();
-    $("#" + getNoteId(id, "edit-desc")).remove();
-    $("#" + getNoteId(id, "edit-title")).remove();
-    
-    const thisIndex = id;
-    let editbid = getNoteId(thisIndex, "editb");
-    console.log(editbid)
-    $("button#" + editbid).on("click", function()
-    {
-        editNote(thisIndex);
-    });
-
+    updateNotes();
 }
+
+function delNote(id)
+{
+    for(var i = id; i < notes.length - 1; i++)
+    {
+        notes[i] = notes[i + 1];
+    }
+    notes.length--;
+
+    updateNotes();
+}
+
+
+function updateNotes()
+{
+    document.getElementsByClassName("all-notes")[0].innerHTML = "";
+    for(var i = 0; i < notes.length; i++)
+    {
+        let allTags = "";
+        if(notes[i].tags.length > 0)
+        {
+            allTags = "tags: " + getTags(notes[i].tags);
+        }
+        
+        const thisIndex = i;
+        
+
+        if(notes[i].state == "pinned")
+        {
+
+
+            // add note to html document with a single string
+            let newNote = "<div class =\"single-note\" id=\"" + getNoteId(i, "div") + "\">" 
+                + getNoteHtml("h2", i, "title", notes[i].title) 
+                + "<div id=\"" + getNoteId(i, "body") + "\">"
+                + getNoteHtml("p", i, "desc", notes[i].desc)
+                + getNoteHtml("p", i, "tags", allTags) + "</div>"
+                + getNoteHtml("p", i, "date", notes[i].date)
+                + "<div class=\"note-buttons\">"
+                + getNoteHtml("button", i, "editb", "Edit")
+                + getNoteHtml("button", i, "delb", "Delete")
+                + getNoteHtml("button", i, "pinb", "Unpin")
+                + "</div>" + "</div>";
+            $("div.all-notes").append(newNote);
+
+            // add event listeners to all buttons
+            let editbid = getNoteId(thisIndex, "editb");
+            $("button#" + editbid).on("click", function()
+            {
+                editNote(thisIndex);
+            });
+            $("button#" + getNoteId(thisIndex, "delb")).on("click", function()
+            {
+                delNote(thisIndex);
+            });
+            $("button#" + getNoteId(thisIndex, "pinb")).on("click", function()
+            {
+                togglePin(thisIndex, "regular");
+            });
+            $("#" + getNoteId(i, "div")).css("background", "rgba(255, 244, 142, 1)");
+        }
+
+        
+    }
+
+    for(var i = 0; i < notes.length; i++)
+    {
+        let allTags = "";
+        if (notes[i].tags.length > 0)
+        {
+            allTags = "tags: " + getTags(notes[i].tags);
+        }
+        const thisIndex = i;
+        
+
+        if(notes[i].state == "regular")
+        {
+
+
+            // add note to html document with a single string
+            let newNote = "<div class =\"single-note\" id=\"" + getNoteId(i, "div") + "\">" 
+                + getNoteHtml("h2", i, "title", notes[i].title) 
+                + "<div class = \"note-body\"id=\"" + getNoteId(i, "body") + "\">"
+                + getNoteHtml("p", i, "desc", notes[i].desc)
+                + getNoteHtml("p", i, "tags", allTags) + "</div>"
+                + getNoteHtml("p", i, "date", notes[i].date)
+                + "<div class=\"note-buttons\">"
+                + getNoteHtml("button", i, "editb", "Edit")
+                + getNoteHtml("button", i, "delb", "Delete")
+                + getNoteHtml("button", i, "pinb", "Pin")
+                + "</div>" + "</div>";
+            $("div.all-notes").append(newNote);
+
+            // add event listeners to buttons
+            let editbid = getNoteId(thisIndex, "editb");
+            $("button#" + editbid).on("click", function()
+            {
+                editNote(thisIndex);
+            });
+
+            $("button#" + getNoteId(thisIndex, "delb")).on("click", function()
+            {
+                delNote(thisIndex);
+            });
+
+            $("button#" + getNoteId(thisIndex, "pinb")).on("click", function()
+            {
+                togglePin(thisIndex, "pinned");
+            });
+        }
+
+        
+    }
+
+    
+}
+
+function togglePin(index, state)
+{
+    notes[index].state = state;
+    updateNotes();
+}
+
