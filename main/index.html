@@ -8,21 +8,32 @@
     </head>
 
     <body>
-        <div class="all-notes">
-            <!-- Example note, not permanent -->
-            <div class="note-div" id="note-div-X">
-                <h2 class="note-title" id="note-title-X">Note Title</h2>
-                <p class="note-desc" id="note-desc-X">Note Desc</p>
-                <p class="note-tags" id="note-tags-X">Note tags: </p>
-                <p class="note-date" id="note-date-X">Last Updated: </p>
-                <button class="note-editb" id="note-editb-X">Edit</button>
-                <button class="note-delb" id="note-delb-X">Delete</button>
-            </div>
-        </div>
+        <h1 id="title">Insert Note Here</h1>
+        <div class="nav-bar">
+            <nav>
+                
+                <button id="archive-toggle">Show/Hide Archive</button>
 
+                <div class="search-section">
+                    <p>Search for Note </p>
+                    <input type="text" id="search-input"></input>
+                </div>
+
+                
+                
+            </nav>
+        </div>
+        <div class="main-section">
+            <div class="all-notes">
+                
+            </div>
+            
+        </div>
         <div id="add-note-div">
             <button id="add-note" class="add">Add Note</button>
         </div>
+
+        
 
         <script src="./notesScript.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
