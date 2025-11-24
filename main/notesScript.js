@@ -64,6 +64,8 @@ function getTags(tags)
 
 document.getElementById("add-note").addEventListener("click", addNote);
 
+
+
 function addNote()
 {
     // get last index
@@ -98,6 +100,8 @@ function editNote(id)
     $("#" + getNoteId(id, "editb")).remove();
     $("#" + getNoteId(id, "delb")).remove();
     $("#" + getNoteId(id, "pinb")).remove();
+    $("#" + getNoteId(id, "archb")).remove();
+
 
     // create html textbox strings
     let titleTextbox = "<textarea type=\"text\" class=\"edit-note-title\" id=\"" + getNoteId(id, "edit-title") + "\">";
@@ -220,7 +224,15 @@ function saveNote(id)
     notes[id].title = document.getElementById(getNoteId(id, "edit-title")).value;
     notes[id].desc = document.getElementById(getNoteId(id, "edit-desc")).value;
     
-    updateNotes();
+    
+    if(showArchived == false)
+    {
+        updateNotes();
+    }
+    else
+    {
+        displayArchived();
+    }
 }
 
 function delNote(id)
@@ -231,12 +243,20 @@ function delNote(id)
     }
     notes.length--;
 
-    updateNotes();
+    if(showArchived == false)
+    {
+        updateNotes();
+    }
+    else
+    {
+        displayArchived();
+    }
 }
 
 
 function updateNotes()
 {
+    showArchived = false;
     document.getElementsByClassName("all-notes")[0].innerHTML = "";
     for(var i = 0; i < notes.length; i++)
     {
@@ -251,37 +271,8 @@ function updateNotes()
 
         if(notes[i].state == "pinned")
         {
-
-
-            // add note to html document with a single string
-            let newNote = "<div class =\"single-note\" id=\"" + getNoteId(i, "div") + "\">" 
-                + getNoteHtml("h2", i, "title", notes[i].title) 
-                + "<div id=\"" + getNoteId(i, "body") + "\">"
-                + getNoteHtml("p", i, "desc", notes[i].desc)
-                + getNoteHtml("p", i, "tags", allTags) + "</div>"
-                + getNoteHtml("p", i, "date", notes[i].date)
-                + "<div class=\"note-buttons\">"
-                + getNoteHtml("button", i, "editb", "Edit")
-                + getNoteHtml("button", i, "delb", "Delete")
-                + getNoteHtml("button", i, "pinb", "Unpin")
-                + "</div>" + "</div>";
-            $("div.all-notes").append(newNote);
-
-            // add event listeners to all buttons
-            let editbid = getNoteId(thisIndex, "editb");
-            $("button#" + editbid).on("click", function()
-            {
-                editNote(thisIndex);
-            });
-            $("button#" + getNoteId(thisIndex, "delb")).on("click", function()
-            {
-                delNote(thisIndex);
-            });
-            $("button#" + getNoteId(thisIndex, "pinb")).on("click", function()
-            {
-                togglePin(thisIndex, "regular");
-            });
-            $("#" + getNoteId(i, "div")).css("background", "rgba(255, 244, 142, 1)");
+            setNote(i);
+        
         }
 
         
@@ -289,48 +280,12 @@ function updateNotes()
 
     for(var i = 0; i < notes.length; i++)
     {
-        let allTags = "";
-        if (notes[i].tags.length > 0)
-        {
-            allTags = "tags: " + getTags(notes[i].tags);
-        }
-        const thisIndex = i;
+        
         
 
         if(notes[i].state == "regular")
         {
-
-
-            // add note to html document with a single string
-            let newNote = "<div class =\"single-note\" id=\"" + getNoteId(i, "div") + "\">" 
-                + getNoteHtml("h2", i, "title", notes[i].title) 
-                + "<div class = \"note-body\"id=\"" + getNoteId(i, "body") + "\">"
-                + getNoteHtml("p", i, "desc", notes[i].desc)
-                + getNoteHtml("p", i, "tags", allTags) + "</div>"
-                + getNoteHtml("p", i, "date", notes[i].date)
-                + "<div class=\"note-buttons\">"
-                + getNoteHtml("button", i, "editb", "Edit")
-                + getNoteHtml("button", i, "delb", "Delete")
-                + getNoteHtml("button", i, "pinb", "Pin")
-                + "</div>" + "</div>";
-            $("div.all-notes").append(newNote);
-
-            // add event listeners to buttons
-            let editbid = getNoteId(thisIndex, "editb");
-            $("button#" + editbid).on("click", function()
-            {
-                editNote(thisIndex);
-            });
-
-            $("button#" + getNoteId(thisIndex, "delb")).on("click", function()
-            {
-                delNote(thisIndex);
-            });
-
-            $("button#" + getNoteId(thisIndex, "pinb")).on("click", function()
-            {
-                togglePin(thisIndex, "pinned");
-            });
+            setNote(i);
         }
 
         
@@ -338,10 +293,239 @@ function updateNotes()
 
     
 }
+let showArchived = false;
 
-function togglePin(index, state)
+function findWord(note, word)
 {
-    notes[index].state = state;
+    for(var i = 0; i < note.title.length; i++)
+    {
+        let title = note.title;
+        
+        if(word[0].toLowerCase() == title[i].toLowerCase())
+        {
+            
+            let lowWord = word.toLowerCase();
+            
+            let listStr = title.substring(i-1, word.length + i).toLowerCase();
+            
+            if(listStr == word.toLowerCase() || title[i].toLowerCase() == word.toLowerCase())
+            {
+                
+                return true;
+            }
+        }
+    }
+    for(var i = 0; i < note.desc.length; i++)
+    {
+        let desc = note.desc;
+        
+        if(word[0].toLowerCase() == desc[i].toLowerCase())
+        {
+            
+            let lowWord = word.toLowerCase();
+            
+            let listStr = desc.substring(i-1, word.length + i).toLowerCase();
+            if(listStr == word.toLowerCase() || desc[i].toLowerCase() == word.toLowerCase())
+            {
+                console.log(listStr);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+function getIndexes(state)
+{
+    let indexList = [];
+    for(var i = 0; i < notes.length; i++)
+    {
+        if(notes[i].state == state)
+        {
+            indexList[indexList.length] = i;
+        }
+    }
+    return indexList;
+}
+function showSearch()
+{
+    
+    let searchVal = document.getElementById("search-input").value;
+    if(showArchived == true)
+    {
+        
+        searchArchive(searchVal);
+        return false;
+    }
+    if(searchVal == "")
+    {
+        updateNotes();
+        return false;
+    }
+    
+    document.getElementsByClassName("all-notes")[0].innerHTML = "";
+    let pinnedIndexes = getIndexes("pinned");
+    let regularIndexes = getIndexes("regular");
+    for(var i = 0; i < pinnedIndexes.length; i++)
+    {
+        if(findValue(notes[pinnedIndexes[i]].tags, searchVal) || findWord(notes[pinnedIndexes[i]], searchVal))
+        {
+            
+            setNote(pinnedIndexes[i]);
+            
+            
+        }
+    }
+    for(var i = 0; i < regularIndexes.length; i++)
+    {
+        if(findValue(notes[regularIndexes[i]].tags, searchVal) || findWord(notes[regularIndexes[i]], searchVal))
+        {
+            
+            
+            setNote(regularIndexes[i]);
+            
+        }
+    }
+    return true;
+}
+
+
+
+function displayArchived()
+{
+    document.getElementsByClassName("all-notes")[0].innerHTML = "";
+    let archivedNotes = getIndexes("archived");
+
+    for(var i = 0; i < archivedNotes.length; i++)
+    {
+        setNote(archivedNotes[i]);
+    }
+}
+function togglePin(index)
+{
+    if(notes[index].state == "pinned")
+    {
+        notes[index].state = "regular";
+    }
+    else
+    {
+        notes[index].state = "pinned";
+    }
     updateNotes();
 }
 
+function toggleArchive()
+{
+    if(showArchived == false)
+    {
+        displayArchived();
+        showArchived = true;
+    }
+    else
+    {
+        updateNotes();
+        showArchived = false;
+    }
+}
+
+function setNote(index)
+{
+    
+    const thisIndex = index;
+    let allTags = "";
+    if(notes[thisIndex].tags.length > 0)
+    {
+        allTags = "tags: " + getTags(notes[thisIndex].tags);
+    }
+    let stateText;
+    let archived = getNoteHtml("button", thisIndex, "archb", "Archive");
+    if(notes[index].state == "pinned")
+    {
+        stateText = getNoteHtml("button", thisIndex, "pinb", "Unpin");
+    }
+    else if(notes[index].state == "regular")
+    {
+        stateText = getNoteHtml("button", thisIndex, "pinb", "Pin");
+    }
+    else
+    {
+        stateText = "";
+        archived = getNoteHtml("button", thisIndex, "archb", "Unarchive");
+    }
+
+    // add note to html document with a single string
+    let newNote = "<div class =\"single-note\" id=\"" + getNoteId(thisIndex, "div") + "\">" 
+        + getNoteHtml("h2", thisIndex, "title", notes[thisIndex].title) 
+        + "<div class = \"note-body\"id=\"" + getNoteId(thisIndex, "body") + "\">"
+        + getNoteHtml("p", thisIndex, "desc", notes[thisIndex].desc)
+        + getNoteHtml("p", thisIndex, "tags", allTags) + "</div>"
+        + getNoteHtml("p", thisIndex, "date", notes[thisIndex].date)
+        + "<div class=\"note-buttons\">"
+        + getNoteHtml("button", thisIndex, "editb", "Edit")
+        + getNoteHtml("button", thisIndex, "delb", "Delete")
+        + stateText
+        + archived
+        + "</div>" + "</div>";
+    $("div.all-notes").append(newNote);
+    if(notes[index].state == "pinned")
+    {
+        $("#" + getNoteId(thisIndex, "div")).css("background", "rgba(255, 244, 142, 1)");
+    }
+    // add event listeners to buttons
+    let editbid = getNoteId(thisIndex, "editb");
+    $("button#" + editbid).on("click", function()
+    {
+        editNote(thisIndex);
+    });
+
+    $("button#" + getNoteId(thisIndex, "delb")).on("click", function()
+    {
+        delNote(thisIndex);
+    });
+
+    $("button#" + getNoteId(thisIndex, "pinb")).on("click", function()
+    {
+        togglePin(thisIndex);
+    });
+
+    $("button#" + getNoteId(thisIndex, "archb")).on("click", function()
+    {
+        setArchived(thisIndex);
+    });
+    
+}
+
+document.getElementById("archive-toggle").addEventListener("click", toggleArchive);
+
+
+document.getElementById("search-button").addEventListener("click", showSearch);
+
+function setArchived(index)
+{
+    if(notes[index].state == "archived")
+    {
+        notes[index].state = "regular";
+        displayArchived();
+    }
+    else
+    {
+        notes[index].state = "archived";
+        updateNotes();
+    }
+    
+}
+
+function searchArchive(search)
+{
+    document.getElementsByClassName("all-notes")[0].innerHTML = "";
+    let archIndexes = getIndexes("archived");
+    for(var i = 0; i < archIndexes.length; i++)
+    {
+        if(findValue(notes[archIndexes[i]].tags, search) || findWord(notes[archIndexes[i]], search))
+        {
+            
+            setNote(archIndexes[i]);
+            
+            
+        }
+    }
+}
