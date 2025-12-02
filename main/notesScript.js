@@ -131,7 +131,15 @@ function editNote(id)
     $("button#" + getNoteId(id, "save-edit")).on("click", function()
     {
         
-        saveNote(id);
+        saveNote(id, false);
+        
+    });
+    let cancelb = getNoteHtml("button", id, "cancel-edit", "Cancel");
+    $("#" + getNoteId(id, "div")).append(cancelb);
+    $("button#" + getNoteId(id, "cancel-edit")).on("click", function()
+    {
+        
+        saveNote(id, true);
         
     });
     updateEditTags(id);
@@ -218,13 +226,17 @@ function findValue(list, value)
 }
 
 
-function saveNote(id)
+function saveNote(id, cancel)
 {
-    notes[id].date = getCurrentDate();
-    notes[id].title = document.getElementById(getNoteId(id, "edit-title")).value;
-    notes[id].desc = document.getElementById(getNoteId(id, "edit-desc")).value;
+    if(cancel == false)
+    {
+        notes[id].date = getCurrentDate();
+        notes[id].title = document.getElementById(getNoteId(id, "edit-title")).value;
+        notes[id].desc = document.getElementById(getNoteId(id, "edit-desc")).value;
+    }
     
-    
+    document.getElementById(getNoteId(id, "div")).innerHTML = "";
+    /*
     if(showArchived == false)
     {
         updateNotes();
@@ -233,6 +245,9 @@ function saveNote(id)
     {
         displayArchived();
     }
+        */
+    setNote(id, true);
+    saveNotesToStorage();
 }
 
 function delNote(id)
@@ -271,7 +286,7 @@ function updateNotes()
 
         if(notes[i].state == "pinned")
         {
-            setNote(i);
+            setNote(i, false);
         
         }
 
@@ -285,11 +300,12 @@ function updateNotes()
 
         if(notes[i].state == "regular")
         {
-            setNote(i);
+            setNote(i, false);
         }
 
         
     }
+    saveNotesToStorage();
 
     
 }
@@ -370,7 +386,7 @@ function showSearch()
         if(findValue(notes[pinnedIndexes[i]].tags, searchVal) || findWord(notes[pinnedIndexes[i]], searchVal))
         {
             
-            setNote(pinnedIndexes[i]);
+            setNote(pinnedIndexes[i], false);
             
             
         }
@@ -381,7 +397,7 @@ function showSearch()
         {
             
             
-            setNote(regularIndexes[i]);
+            setNote(regularIndexes[i], false);
             
         }
     }
@@ -397,8 +413,9 @@ function displayArchived()
 
     for(var i = 0; i < archivedNotes.length; i++)
     {
-        setNote(archivedNotes[i]);
+        setNote(archivedNotes[i], false);
     }
+    saveNotesToStorage();
 }
 function togglePin(index)
 {
@@ -427,7 +444,7 @@ function toggleArchive()
     }
 }
 
-function setNote(index)
+function setNote(index, saving)
 {
     
     const thisIndex = index;
@@ -451,21 +468,41 @@ function setNote(index)
         stateText = "";
         archived = getNoteHtml("button", thisIndex, "archb", "Unarchive");
     }
-
+    let newNote;
     // add note to html document with a single string
-    let newNote = "<div class =\"single-note\" id=\"" + getNoteId(thisIndex, "div") + "\">" 
-        + getNoteHtml("h2", thisIndex, "title", notes[thisIndex].title) 
-        + "<div class = \"note-body\"id=\"" + getNoteId(thisIndex, "body") + "\">"
-        + getNoteHtml("p", thisIndex, "desc", notes[thisIndex].desc)
-        + getNoteHtml("p", thisIndex, "tags", allTags) + "</div>"
-        + getNoteHtml("p", thisIndex, "date", notes[thisIndex].date)
-        + "<div class=\"note-buttons\">"
-        + getNoteHtml("button", thisIndex, "editb", "Edit")
-        + getNoteHtml("button", thisIndex, "delb", "Delete")
-        + stateText
-        + archived
-        + "</div>" + "</div>";
-    $("div.all-notes").append(newNote);
+    if(saving == false)
+    {
+        newNote = "<div class =\"single-note\" id=\"" + getNoteId(thisIndex, "div") + "\">" 
+            + getNoteHtml("h2", thisIndex, "title", notes[thisIndex].title) 
+            + "<div class = \"note-body\"id=\"" + getNoteId(thisIndex, "body") + "\">"
+            + getNoteHtml("p", thisIndex, "desc", notes[thisIndex].desc)
+            + getNoteHtml("p", thisIndex, "tags", allTags) + "</div>"
+            + getNoteHtml("p", thisIndex, "date", notes[thisIndex].date)
+            + "<div class=\"note-buttons\">"
+            + getNoteHtml("button", thisIndex, "editb", "Edit")
+            + getNoteHtml("button", thisIndex, "delb", "Delete")
+            + stateText
+            + archived
+            + "</div>" + "</div>";
+
+        $("div.all-notes").append(newNote);
+    }
+    else
+    {
+        
+        newNote = getNoteHtml("h2", thisIndex, "title", notes[thisIndex].title)
+            + "<div class = \"note-body\"id=\"" + getNoteId(thisIndex, "body") + "\">"
+            + getNoteHtml("p", thisIndex, "desc", notes[thisIndex].desc)
+            + getNoteHtml("p", thisIndex, "tags", allTags) + "</div>"
+            + getNoteHtml("p", thisIndex, "date", notes[thisIndex].date)
+            + "<div class=\"note-buttons\">"
+            + getNoteHtml("button", thisIndex, "editb", "Edit")
+            + getNoteHtml("button", thisIndex, "delb", "Delete")
+            + stateText
+            + archived
+            + "</div>";
+        $("#" + getNoteId(thisIndex, "div")).append(newNote);
+    }
     if(notes[index].state == "pinned")
     {
         $("#" + getNoteId(thisIndex, "div")).css("background", "rgba(255, 244, 142, 1)");
@@ -523,9 +560,33 @@ function searchArchive(search)
         if(findValue(notes[archIndexes[i]].tags, search) || findWord(notes[archIndexes[i]], search))
         {
             
-            setNote(archIndexes[i]);
+            setNote(archIndexes[i], false);
             
             
         }
     }
+}
+let notesStr;
+let notesLoaded = false;
+saveNotesToStorage();
+function saveNotesToStorage()
+{
+    
+    if(notesLoaded == false)
+    {
+        notesLoaded = true;
+        loadNotes();
+        
+    }
+    
+    notesStr = JSON.stringify(notes);
+    localStorage.setItem("notes", notesStr);
+    
+}
+
+function loadNotes()
+{
+    notes = JSON.parse(localStorage.getItem("notes"));
+    updateNotes();
+    
 }
