@@ -15,6 +15,7 @@
 html {
     
     background-attachment: fixed;
+    background-image: url("./background.png");
 }
 
 
@@ -26,6 +27,13 @@ nav
     display: flex;
     flex-direction: row;
     justify-content: space-around;
+    
+}
+.top-bar {
+    position: fixed;
+    width: 100%;
+    left: 0px;
+    top: 0px;
 }
 .search-section {
     display: flex;
@@ -66,6 +74,7 @@ body {
     flex-flow: row wrap;
     justify-content: space-evenly;
     width: 100%;
+    padding-top: 10%;
     
 }
 .single-note {
@@ -76,10 +85,12 @@ body {
     border: 1px solid black;
     align-items: center;
     margin: 5%;
+    transition-duration: .67s;
 }
 .single-note:hover
 {
-    scale: 110%;
+    transform: scale(110%);
+    transition-duration: .67s;
 }
 .note-date
 {
@@ -133,4 +144,7 @@ textarea.edit-note-title {
 #add-note {
     width: 15%;
     height: 10em;
+    background-image: url("addbutton.png");
+    background-attachment: scroll;
+    background-size: cover;
 }
