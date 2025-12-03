@@ -1,5 +1,5 @@
 let notes = [
-    /* example note for reference
+    /*
     { // start note
         title: "template title",
         desc: "note content here",
@@ -8,6 +8,7 @@ let notes = [
         tags: ["tag1", "tag2"]
     } // end note
      */
+    
 ];
 
 // used to add to the array
@@ -271,6 +272,7 @@ function delNote(id)
 
 function updateNotes()
 {
+    console.log(notes);
     showArchived = false;
     document.getElementsByClassName("all-notes")[0].innerHTML = "";
     for(var i = 0; i < notes.length; i++)
@@ -586,7 +588,14 @@ function saveNotesToStorage()
 
 function loadNotes()
 {
-    notes = JSON.parse(localStorage.getItem("notes"));
-    updateNotes();
+    
+    let testStr = JSON.parse(localStorage.getItem("notes"));
+    
+    if(testStr != null) 
+    {
+        notes = JSON.parse(localStorage.getItem("notes"));
+        console.log("-> " + testStr);
+        updateNotes();
+    }
     
 }
