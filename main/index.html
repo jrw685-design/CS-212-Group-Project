@@ -1,46 +1,42 @@
 <!DOCTYPE html>
-    <link rel="stylesheet" href="./styles.css">
-    <head>
-        <title>
-            Insert Note Here
-        </title>
+<html>
+<head>
+    <title>Sticky Notes</title>
 
-    </head>
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
-    <body>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <div class="header-bar">
         <div class="title-section">
-            <img src="./title.png" id="title">
+            <img src="title.png" alt="Sticky Notes">
         </div>
-        <div class="nav-bar">
-            <nav>
-                
-                <button id="archive-toggle">Show/Hide Archive</button>
 
-                <div class="search-section">
-                    <p>Search for Note </p>
-                    <input type="text" id="search-input"></input>
-                    <button id="search-button">Search</button>
-                </div>
-
-                
-                
-            </nav>
+        <div class="search-section">
+            <p>Search:</p>
+            <input type="text" id="search-input">
+            <button id="search-button">Search</button>
         </div>
-        <div class="main-section">
-            <div class="all-notes">
-                
-            </div>
-            
+    </div>
+
+    <div class="main-section">
+        <div class="all-notes"></div>
+    </div>
+
+    <div class="bottom-controls">
+        <div id="archive-toggle-container">
+            <button id="archive-toggle">Show/Hide Archive</button>
         </div>
         <div id="add-note-div">
             <button id="add-note" class="add">Add Note</button>
         </div>
+    </div>
 
-        
-
-        <script src="./notesScript.js"></script>
-        
-    </body>
-
+    <script src="notesScript.js"></script>
+</body>
 </html>
